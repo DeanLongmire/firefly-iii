@@ -44,11 +44,12 @@ class IndexController extends Controller
             app('view')->share('mainTitleIcon', 'fa-exchange');
             app('view')->share('title', (string) trans('firefly.header_exchange_rates'));
 
+            if (false === FireflyConfig::get('enable_exchange_rates', config('cer.enabled'))->data) {
+                throw new NotFoundHttpException();
+            }
+
             return $next($request);
         });
-        if (false === FireflyConfig::get('enable_exchange_rates', config('cer.enabled'))->data) {
-            throw new NotFoundHttpException();
-        }
     }
 
     public function index(): View
