@@ -104,6 +104,9 @@ class AccountController extends Controller
         $cache->addProperty($end);
         $cache->addProperty($this->convertToPrimary);
         $cache->addProperty('chart.account.expense-accounts');
+        if (config('app.debug')) {
+            $cache->addProperty(filemtime(__FILE__));
+        }
         if ($cache->has()) {
             return response()->json($cache->get());
         }
@@ -670,6 +673,9 @@ class AccountController extends Controller
         $cache->addProperty($end);
         $cache->addProperty($this->convertToPrimary);
         $cache->addProperty('chart.account.revenue-accounts');
+        if (config('app.debug')) {
+            $cache->addProperty(filemtime(__FILE__));
+        }
         if ($cache->has()) {
             return response()->json($cache->get());
         }
