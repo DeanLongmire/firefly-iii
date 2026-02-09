@@ -20,6 +20,7 @@
 /** global: Chart, defaultChartOptions, accounting, defaultPieOptions, noDataForChart, todayText */
 var allCharts = {};
 
+var preferredColors = [];
 
 /*
  Make some colours:
@@ -64,11 +65,44 @@ function colorizeData(data) {
     var newData = {};
     newData.datasets = [];
 
+    let colorIndex = 0;
     for (var loop = 0; loop < data.count; loop++) {
         newData.labels = data.labels;
         var dataset = data.datasets[loop];
         dataset.fill = false;
-        dataset.backgroundColor = dataset.borderColor = fillColors[loop];
+
+        // If the backend provides per-bar colours (array), keep them and only
+        // fill in blanks from the palette.
+        if (Array.isArray(dataset.backgroundColor)) {
+            var filledBackground = [];
+            for (var bgIndex = 0; bgIndex < dataset.backgroundColor.length; bgIndex++) {
+                var bgColor = dataset.backgroundColor[bgIndex];
+                if (typeof bgColor === 'undefined' || bgColor === null || bgColor === '') {
+                    bgColor = fillColors[colorIndex % fillColors.length];
+                    colorIndex++;
+                }
+                filledBackground.push(bgColor);
+            }
+            dataset.backgroundColor = filledBackground;
+            if (!Array.isArray(dataset.borderColor)) {
+                dataset.borderColor = filledBackground;
+            }
+            newData.datasets.push(dataset);
+            continue;
+        }
+
+        // Prefer server-provided dataset.datasetColor
+        var chosenColor = dataset.datasetColor;
+        if (typeof chosenColor === 'undefined' || chosenColor === null || chosenColor === '' || preferredColors.includes(chosenColor)) {
+            chosenColor = fillColors[colorIndex % fillColors.length];
+            colorIndex++;
+        } else {
+            preferredColors.push(chosenColor);
+        }
+        dataset.backgroundColor = chosenColor;
+        dataset.borderColor = chosenColor;
+        dataset.pointBackgroundColor = chosenColor;
+        dataset.pointBorderColor = chosenColor;
         newData.datasets.push(dataset);
     }
     return newData;

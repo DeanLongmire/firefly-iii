@@ -62,6 +62,8 @@
                         {% endif %}
                         {{ ExpandedForm.textarea('notes',null,{helpText: trans('firefly.field_supports_markdown')}) }}
                         {{ ExpandedForm.file('attachments[]', {'multiple': 'multiple','helpText': trans('firefly.upload_max_file_size', {'size': uploadSize|filesize}) }) }}
+                        {{ ExpandedForm.checkbox('use_preferred_chart_color', 1) }}
+                        {{ ExpandedForm.colorInput('preferred_chart_color') }}
                     </div>
                 </div>
             </div>

@@ -115,6 +115,8 @@ return [
     'startdate'                   => 'Start date',
     'start_date'                  => 'Start date',
     'tag'                         => 'Tag',
+    'preferred_chart_color'       => 'Preferred chart color',
+    'use_preferred_chart_color'   => 'Use custom chart color',
 
     // exchange rates
     'from_currency_to_currency'   => '{from} &rarr; {to}',

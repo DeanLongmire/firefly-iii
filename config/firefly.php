@@ -820,9 +820,9 @@ return [
         AccountTypeEnum::RECONCILIATION->value,
         AccountTypeEnum::LIABILITY_CREDIT->value,
     ],
-    'valid_asset_fields'                   => ['account_role', 'account_number', 'currency_id', 'BIC', 'include_net_worth'],
-    'valid_cc_fields'                      => ['account_role', 'cc_monthly_payment_date', 'cc_type', 'account_number', 'currency_id', 'BIC', 'include_net_worth'],
-    'valid_account_fields'                 => ['account_number', 'currency_id', 'BIC', 'interest', 'interest_period', 'include_net_worth', 'liability_direction'],
+    'valid_asset_fields'                   => ['account_role', 'account_number', 'currency_id', 'BIC', 'include_net_worth', 'preferred_chart_color'],
+    'valid_cc_fields'                      => ['account_role', 'cc_monthly_payment_date', 'cc_type', 'account_number', 'currency_id', 'BIC', 'include_net_worth', 'preferred_chart_color'],
+    'valid_account_fields'                 => ['account_number', 'currency_id', 'BIC', 'interest', 'interest_period', 'include_net_worth', 'liability_direction', 'preferred_chart_color'],
 
     // dynamic date ranges are as follows:
     'dynamic_date_ranges'                  => ['last7', 'last30', 'last90', 'last365', 'MTD', 'QTD', 'YTD'],

@@ -96,10 +96,12 @@ class CreateController extends Controller
         }
 
         // pre fill some data
-        $request->session()->flash('preFilled', [
-            'currency_id'       => $this->primaryCurrency->id,
-            'include_net_worth' => !$hasOldInput || (bool) $request->old('include_net_worth'),
-        ]);
+        $preFilled = [
+            'currency_id'               => $this->primaryCurrency->id,
+            'include_net_worth'         => !$hasOldInput || (bool) $request->old('include_net_worth'),
+            'use_preferred_chart_color' => $hasOldInput && (bool) $request->old('use_preferred_chart_color'),
+        ];
+        $request->session()->flash('preFilled', $preFilled);
         // issue #8321
         $showNetWorth        = true;
         if ('liabilities' !== $objectType && 'asset' !== $objectType) {
@@ -123,6 +125,7 @@ class CreateController extends Controller
             'subTitle'            => $subTitle,
             'roles'               => $roles,
             'liabilityTypes'      => $liabilityTypes,
+            'preFilled'           => $preFilled,
         ]);
     }
 

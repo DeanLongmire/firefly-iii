@@ -34,7 +34,46 @@ $(document).ready(function () {
     // selection of the direction.
     $("#ffInput_liability_direction").change(triggerDirection);
     triggerDirection();
+
+    // Preferred chart color toggle
+    togglePreferredChartColor();
+    $('#ffInput_use_preferred_chart_color').change(togglePreferredChartColor);
 });
+
+function togglePreferredChartColor() {
+    var checkbox = $('#ffInput_use_preferred_chart_color');
+    var holder = $('#preferred_chart_color_holder');
+    var input = $('#ffInput_preferred_chart_color');
+    if (checkbox.length === 0 || holder.length === 0 || input.length === 0) {
+        return;
+    }
+    var enabled = checkbox.is(':checked');
+    holder.toggle(enabled);
+    input.prop('disabled', !enabled);
+
+    // If user enables it and it's the browser default, choose a nicer default.
+    if (enabled) {
+        var val = (input.val() || '').toLowerCase();
+        if (val === '' || val === '#000000') {
+            input.val(randomHexColor());
+        }
+    }
+}
+
+function randomHexColor() {
+    // Prefer crypto for better randomness.
+    if (window.crypto && window.crypto.getRandomValues) {
+        var bytes = new Uint8Array(3);
+        window.crypto.getRandomValues(bytes);
+        return '#' + Array.from(bytes).map(function (b) {
+            return b.toString(16).padStart(2, '0');
+        }).join('');
+    }
+
+    // Fallback.
+    var n = Math.floor(Math.random() * 0x1000000);
+    return '#' + n.toString(16).padStart(6, '0');
+}
 
 
 function triggerDirection() {

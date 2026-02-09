@@ -137,12 +137,15 @@ class EditController extends Controller
         // code to handle active-checkboxes
         $hasOldInput          = null !== $request->old('_token');
         $virtualBalance       = $account->virtual_balance ?? '0';
+        $preferredChartColor  = (string) $repository->getMetaValue($account, 'preferred_chart_color');
         $preFilled            = [
             'account_number'          => $repository->getMetaValue($account, 'account_number'),
             'account_role'            => $repository->getMetaValue($account, 'account_role'),
             'cc_type'                 => $repository->getMetaValue($account, 'cc_type'),
             'cc_monthly_payment_date' => $repository->getMetaValue($account, 'cc_monthly_payment_date'),
             'BIC'                     => $repository->getMetaValue($account, 'BIC'),
+            'use_preferred_chart_color' => $hasOldInput ? (bool) $request->old('use_preferred_chart_color') : '' !== $preferredChartColor,
+            'preferred_chart_color'   => $preferredChartColor,
             'opening_balance_date'    => substr((string) $openingBalanceDate, 0, 10),
             'liability_type_id'       => $account->account_type_id,
             'opening_balance'         => Steam::bcround($openingBalanceAmount, $currency->decimal_places),

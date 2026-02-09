@@ -96,6 +96,9 @@ class AccountController extends Controller
         $start->startOfDay();
         $end->endOfDay();
 
+        /** @var AccountRepositoryInterface $accountRepos */
+        $accountRepos     = app(AccountRepositoryInterface::class);
+
         $cache                         = new CacheProperties();
         $cache->addProperty($start);
         $cache->addProperty($end);
@@ -109,6 +112,7 @@ class AccountController extends Controller
         $currencies                    = [];
         $chartData                     = [];
         $tempData                      = [];
+        $preferredColoursByName        = [];
 
         // grab all accounts and names
         $accounts                      = $this->accountRepository->getAccountsByType([AccountTypeEnum::EXPENSE->value]);
@@ -126,6 +130,13 @@ class AccountController extends Controller
                 Log::error(sprintf('Found no end balance for account #%d', $account->id));
 
                 continue;
+            }
+
+            // Store preferred chart colour for this account name (if any).
+            $accountName = $accountNames[$account->id] ?? $account->name;
+            $preferred   = (string) $accountRepos->getMetaValue($account, 'preferred_chart_color');
+            if ('' !== $preferred) {
+                $preferredColoursByName[$accountName] = $preferred;
             }
 
             /**
@@ -181,12 +192,19 @@ class AccountController extends Controller
          * @var TransactionCurrency $currency
          */
         foreach ($currencies as $currencyId => $currency) {
+            $entries   = $this->expandNames($tempData);
+            $barColors = [];
+            foreach (array_keys($entries) as $entryName) {
+                // Empty string means: let the JS side fill from the palette.
+                $barColors[] = $preferredColoursByName[$entryName] ?? '';
+            }
             $dataSet                = [
                 'label'           => (string) trans('firefly.spent'),
                 'type'            => 'bar',
                 'currency_symbol' => $currency->symbol,
                 'currency_code'   => $currency->code,
-                'entries'         => $this->expandNames($tempData),
+                'entries'         => $entries,
+                'backgroundColor' => $barColors,
             ];
             $chartData[$currencyId] = $dataSet;
         }
@@ -197,7 +215,6 @@ class AccountController extends Controller
             $name                                     = $entry['name'];
             $chartData[$currencyId]['entries'][$name] = (float) $entry['difference'];
         }
-
         $data                          = $this->generator->multiSet($chartData);
         $cache->store($data);
 
@@ -642,6 +659,9 @@ class AccountController extends Controller
         /** @var Carbon $end */
         $end                           = clone session('end', today(config('app.timezone'))->endOfMonth());
 
+        /** @var AccountRepositoryInterface $accountRepos */
+        $accountRepos     = app(AccountRepositoryInterface::class);
+
         $start->startOfDay();
         $end->endOfDay();
 
@@ -658,6 +678,7 @@ class AccountController extends Controller
         $currencies                    = [];
         $chartData                     = [];
         $tempData                      = [];
+        $preferredColoursByName        = [];
 
         // grab all accounts and names
         $accounts                      = $this->accountRepository->getAccountsByType([AccountTypeEnum::REVENUE->value]);
@@ -675,6 +696,13 @@ class AccountController extends Controller
                 Log::error(sprintf('Found no end balance for account #%d', $account->id));
 
                 continue;
+            }
+
+            // Store preferred chart colour for this account name (if any).
+            $accountName = $accountNames[$account->id] ?? $account->name;
+            $preferred   = (string) $accountRepos->getMetaValue($account, 'preferred_chart_color');
+            if ('' !== $preferred) {
+                $preferredColoursByName[$accountName] = $preferred;
             }
 
             /**
@@ -731,12 +759,19 @@ class AccountController extends Controller
          * @var TransactionCurrency $currency
          */
         foreach ($currencies as $currencyId => $currency) {
+            $entries   = $this->expandNames($tempData);
+            $barColors = [];
+            foreach (array_keys($entries) as $entryName) {
+                // Empty string means: let the JS side fill from the palette.
+                $barColors[] = $preferredColoursByName[$entryName] ?? '';
+            }
             $dataSet                = [
                 'label'           => (string) trans('firefly.earned'),
                 'type'            => 'bar',
                 'currency_symbol' => $currency->symbol,
                 'currency_code'   => $currency->code,
-                'entries'         => $this->expandNames($tempData),
+                'entries'         => $entries,
+                'backgroundColor' => $barColors,
             ];
             $chartData[$currencyId] = $dataSet;
         }
