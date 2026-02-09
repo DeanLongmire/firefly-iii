@@ -73,6 +73,17 @@ class AccountFormRequest extends FormRequest
             'liability_direction'     => $this->convertString('liability_direction'),
         ];
 
+        // Only persist preferred chart color when explicitly enabled.
+        // This prevents accidentally saving the browser default (#000000).
+        if (true === $this->boolean('use_preferred_chart_color')) {
+            $data['preferred_chart_color'] = $this->convertString('preferred_chart_color');
+        }
+
+        // When editing and the checkbox is OFF, actively clear the meta value.
+        $account = $this->route()->parameter('account');
+        if (null !== $account && false === $this->boolean('use_preferred_chart_color')) {
+            $data['preferred_chart_color'] = '';
+        }
         $data = $this->appendLocationData($data, 'location');
         if (false === $this->boolean('include_net_worth')) {
             $data['include_net_worth'] = '0';
@@ -112,6 +123,8 @@ class AccountFormRequest extends FormRequest
             'virtual_balance'                    => ['nullable', new IsValidAmount()],
             'currency_id'                        => 'exists:transaction_currencies,id',
             'account_number'                     => 'min:1|max:255|uniqueAccountNumberForUser|nullable',
+            'preferred_chart_color'              => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'], // Keep this line for validation
+            'use_preferred_chart_color'          => 'boolean',
             'account_role'                       => 'in:'.$accountRoles,
             'active'                             => 'boolean',
             'cc_type'                            => 'in:'.$ccPaymentTypes,
@@ -133,6 +146,15 @@ class AccountFormRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // If the user didn't opt-in, ignore any submitted color value.
+        // This avoids validating (and storing) the default color.
+        if (false === $this->boolean('use_preferred_chart_color')) {
+            $this->merge(['preferred_chart_color' => null]);
+        }
     }
 
     public function withValidator(Validator $validator): void

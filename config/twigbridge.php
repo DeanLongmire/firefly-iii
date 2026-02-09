@@ -189,6 +189,7 @@ return [
                     'amountNoCurrency',
                     'percentage',
                     'objectGroup',
+                    'colorInput',
                 ],
             ],
             'AccountForm'   => [

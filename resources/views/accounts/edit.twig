@@ -79,7 +79,8 @@
                         {# only correct way to do active checkbox #}
 
                         {{ ExpandedForm.file('attachments[]', {'multiple': 'multiple','helpText': trans('firefly.upload_max_file_size', {'size': uploadSize|filesize}) }) }}
-
+                        {{ ExpandedForm.checkbox('use_preferred_chart_color', 1) }}
+                        {{ ExpandedForm.colorInput('preferred_chart_color', preFilled.preferred_chart_color) }}
                     </div>
                 </div>
 

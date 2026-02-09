@@ -55,6 +55,11 @@ trait ChartGeneration
         $cache->addProperty('chart.account.account-balance-chart');
         $cache->addProperty($accounts);
         $cache->addProperty($convertToPrimary);
+        // In debug, include relevant source mtimes so chart JSON updates immediately after code edits.
+        if (true === (bool) config('app.debug')) {
+            $cache->addProperty(@filemtime(app_path('Support/Http/Controllers/ChartGeneration.php')));
+            $cache->addProperty(@filemtime(app_path('Generator/Chart/Basic/ChartJsGenerator.php')));
+        }
         if ($cache->has()) {
             return $cache->get();
         }
@@ -81,6 +86,10 @@ trait ChartGeneration
             $currency     = $usePrimary ? $primary : $currency;
             Log::debug(sprintf('Will use field %s', $field));
             $currentSet   = ['label'           => $account->name, 'currency_symbol' => $currency->symbol, 'entries'         => []];
+            $preferredChartColor = (string) $accountRepos->getMetaValue($account, 'preferred_chart_color');
+            if ('' !== $preferredChartColor) {
+                $currentSet['datasetColor'] = $preferredChartColor;
+            }
 
             $currentStart = clone $start;
             $range        = Steam::finalAccountBalanceInRange($account, clone $start, clone $end, $this->convertToPrimary);

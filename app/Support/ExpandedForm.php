@@ -464,4 +464,37 @@ class ExpandedForm
 
         return $html;
     }
+
+    /**
+     * @param mixed $value
+     *
+     * @throws FireflyException
+     */
+    public function colorInput(string $name, $value = null, ?array $options = null): string
+    {
+        $options ??= [];
+        $label           = $this->label($name, $options);
+        $options         = $this->expandOptionArray($name, $label, $options);
+        $classes         = $this->getHolderClasses($name);
+        $value           = $this->fillFieldValue($name, $value);
+        $options['step'] = 'any';
+        unset($options['currency'], $options['placeholder']);
+
+        try {
+            $html = view('form.color-input', [
+                'classes' => $classes,
+                'name'    => $name,
+                'label'   => $label,
+                'value'   => $value,
+                'options' => $options,
+            ])->render();
+        } catch (Throwable $e) {
+            Log::error(sprintf('Could not render colorInput(): %s', $e->getMessage()));
+            $html = 'Could not render colorInput.';
+
+            throw new FireflyException($html, 0, $e);
+        }
+
+        return $html;
+    }
 }
