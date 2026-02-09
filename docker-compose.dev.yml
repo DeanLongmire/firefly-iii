@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    environment:
+      XDEBUG_MODE: "off"
+    volumes:
+      - .:/workspace:cached
+    working_dir: /workspace
+    command: sleep infinity
+    depends_on:
+      - db
+    ports:
+      - "8001:8000"
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_DATABASE: firefly
+      MYSQL_USER: firefly
+      MYSQL_PASSWORD: secret_firefly_password
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - firefly_dev_db:/var/lib/mysql
+
+volumes:
+  firefly_dev_db:
