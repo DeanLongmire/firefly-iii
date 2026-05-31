@@ -1,0 +1,35 @@
+.git
+.gitignore
+.github
+.devcontainer
+.vscode
+.idea
+*.swp
+*.swo
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Node / frontend
+node_modules
+**/node_modules
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Composer / PHP
+vendor
+
+# Runtime/generated
+storage
+bootstrap/cache
+public/storage
+public/build
+public/hot
+public/mix-manifest.json
+
+# Tests and tooling output
+coverage
+.phpunit.result.cache

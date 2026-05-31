@@ -28,7 +28,7 @@ This repo includes a devcontainer setup that runs the app + a MariaDB database i
 In the **container terminal**:
 
 ```bash
-php artisan firefly-iii:upgrade-database --force
+php artisan firefly-iii:upgrade-database 
 php artisan firefly-iii:laravel-passport-keys
 ```
 

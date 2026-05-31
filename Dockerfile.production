@@ -1,0 +1,88 @@
+# syntax=docker/dockerfile:1
+
+ARG PHP_VERSION=8.4
+ARG NODE_VERSION=20
+
+# ----------------------------
+# 1) Composer dependencies
+# ----------------------------
+FROM php:${PHP_VERSION}-cli-bookworm AS composer_deps
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        libicu-dev \
+        libzip-dev \
+        zlib1g-dev \
+    && docker-php-ext-install -j"$(nproc)" intl bcmath pdo_mysql zip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Composer (pinned to official installer)
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && rm -f composer-setup.php
+
+COPY composer.json composer.lock ./
+
+# Don't run post-install scripts (they call artisan and require runtime env)
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --prefer-dist \
+    --no-scripts \
+    --optimize-autoloader
+
+
+# ----------------------------
+# 2) Frontend assets (v1 Mix + v2 Vite)
+# ----------------------------
+FROM node:${NODE_VERSION}-bookworm AS assets
+
+WORKDIR /app
+
+# Install root workspace deps first for better layer caching.
+COPY package.json package-lock.json ./
+COPY resources/assets/v1/package.json resources/assets/v1/package.json
+COPY resources/assets/v2/package.json resources/assets/v2/package.json
+COPY patches ./patches
+
+RUN npm ci
+
+# Copy sources needed for builds.
+COPY resources ./resources
+COPY public ./public
+
+# Build legacy v1 bundles into public/v1/js
+RUN npm --workspace resources/assets/v1 run prod
+
+# Build v2 bundles into public/build (via laravel-vite-plugin publicDirectory)
+RUN npm --workspace resources/assets/v2 run build
+
+
+# ----------------------------
+# 3) Runtime image
+# ----------------------------
+FROM fireflyiii/core:latest
+
+WORKDIR /var/www/html
+
+# Replace application source with this repo.
+# (storage is excluded via .dockerignore so the image's writable dirs remain intact.)
+COPY --chown=www-data:www-data . /var/www/html
+
+# Bring in production vendor/ + compiled assets.
+COPY --from=composer_deps --chown=www-data:www-data /app/vendor /var/www/html/vendor
+COPY --from=assets --chown=www-data:www-data /app/public/v1 /var/www/html/public/v1
+COPY --from=assets --chown=www-data:www-data /app/public/build /var/www/html/public/build
+
+# Make sure Laravel writable dirs exist and are writable.
+USER root
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+USER www-data
+
+# Entrypoint/CMD are inherited from fireflyiii/core:latest
