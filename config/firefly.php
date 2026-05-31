@@ -299,7 +299,7 @@ return [
         // JSON
         'application/json',
     ],
-    'accountRoles'                         => ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset'],
+    'accountRoles'                         => ['defaultAsset', 'sharedAsset', 'savingAsset', 'ccAsset', 'cashWalletAsset', 'retirementAsset', 'investmentAsset'],
     'valid_liabilities'                    => [AccountTypeEnum::DEBT->value, AccountTypeEnum::LOAN->value, AccountTypeEnum::MORTGAGE->value],
     'ccTypes'                              => ['monthlyFull' => 'Full payment every month'],
     'credit_card_types'                    => ['monthlyFull'],

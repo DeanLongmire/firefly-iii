@@ -263,6 +263,36 @@ span.twitter-typeahead {
     background-color: #f5f5f5;
 }
 
+/* Custom additions classes */
+.btn-net-worth {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.55);
+    min-width: 72px;
+    text-align: center;
+}
+
+.btn-net-worth:hover,
+.btn-net-worth:active,
+.btn-net-worth:active:focus {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.75);
+    outline: none;
+    box-shadow: none;
+}
+
+/* Custom bootstrap classes */
+.d-flex {
+    display: flex;
+}
+.flex-row {
+    flex-direction: row;
+}
+.justify-content-between {
+    justify-content: space-between;
+}
+
 
 /*
 .twitter-typeahead {

@@ -19,6 +19,10 @@
  */
 
 
+var netWorthAll = [];
+var netWorthLiquid = [];
+var netWorthMode = 'all';
+
 $(function () {
     "use strict";
     // do chart JS stuff.
@@ -61,6 +65,7 @@ function drawChart() {
 
             // net worth
             var net_worth = [];
+            var liquid_net_worth = [];
             var keepGreen = false;
             var makeBlue = false;
 
@@ -94,7 +99,11 @@ function drawChart() {
 
                 // net worth
                 if (key.substring(0, 13) === 'net-worth-in-') {
-                    net_worth.push(data[key].value_parsed);
+                    if (key.substring(0, 19) === 'net-worth-in-liquid') {
+                        liquid_net_worth.push(data[key].value_parsed);
+                    } else {
+                        net_worth.push(data[key].value_parsed);
+                    }
                 }
             }
             if(!keepGreen) {
@@ -117,12 +126,38 @@ function drawChart() {
             $('#box-left-per-day').html(left_to_spend_bottom.join(', '));
 
             // net worth
-            $('#box-net-worth').html(net_worth.join(', '));
+            netWorthAll = net_worth;
+            netWorthLiquid = liquid_net_worth;
+            updateNetWorthBox();
+            setupNetWorthToggle();
 
         });
     }
 
     //getBoxAmounts();
+}
+
+function setupNetWorthToggle() {
+    "use strict";
+    if (netWorthLiquid.join(', ') === netWorthAll.join(', ')) {
+        $('#box-net-worth-toggle').remove();
+        return;
+    }
+    var $toggle = $('#box-net-worth-toggle');
+    if (0 === $toggle.length) {
+        return;
+    }
+    $toggle.off('click.netWorthToggle').on('click.netWorthToggle', function () {
+        netWorthMode = netWorthMode === 'liquid' ? 'all' : 'liquid';
+        $toggle.text(netWorthMode === 'liquid' ? 'All' : 'Liquid');
+        updateNetWorthBox();
+    });
+}
+
+function updateNetWorthBox() {
+    "use strict";
+    var values = netWorthMode === 'liquid' ? netWorthLiquid : netWorthAll;
+    $('#box-net-worth').html(values.join(', '));
 }
 
 /**
