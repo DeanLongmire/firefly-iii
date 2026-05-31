@@ -71,6 +71,7 @@ class NetWorth implements NetWorthInterface
         Log::debug(sprintf('Now in byAccounts("%s", "%s")', $ids, $date->format('Y-m-d H:i:s')));
         $primary          = Amount::getPrimaryCurrency();
         $netWorth         = [];
+        $liquidNetWorth   = [];
         Log::debug(sprintf('NetWorth: accountsBalancesOptimized("%s")', $date->format('Y-m-d H:i:s')));
         $balances         = Steam::accountsBalancesOptimized($accounts, $date, null, $convertToPrimary);
 
@@ -104,11 +105,28 @@ class NetWorth implements NetWorthInterface
                 'currency_symbol'         => $currency->symbol,
                 'currency_decimal_places' => $currency->decimal_places,
             ];
-
             $netWorth[$currencyCode]['balance'] = bcadd((string) $amountToUse, $netWorth[$currencyCode]['balance']);
+            
+            $accountRole = $this->accountRepository->getMetaValue($account, 'account_role');
+            if ($accountRole != 'investmentAsset' && $accountRole != 'retirementAsset') {
+                $liquidKey = $currencyCode . '-liquid';
+                $liquidNetWorth[$liquidKey] ??= [
+                    'balance'                 => '0',
+                    'currency_id'             => (string) $currency->id,
+                    'currency_code'           => $currency->code,
+                    'currency_name'           => $currency->name,
+                    'currency_symbol'         => $currency->symbol,
+                    'currency_decimal_places' => $currency->decimal_places,
+                ];
+                $liquidNetWorth[$liquidKey]['balance'] = bcadd((string) $amountToUse, $liquidNetWorth[$liquidKey]['balance']);
+            }
         }
         $cache->store($netWorth);
+        $cache->store($liquidNetWorth);
 
+        if (count($liquidNetWorth) > 0) {
+            return array_merge($netWorth, $liquidNetWorth);
+        }
         return $netWorth;
     }
 

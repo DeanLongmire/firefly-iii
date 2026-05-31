@@ -491,8 +491,9 @@ class BasicController extends Controller
                 continue;
             }
             // return stuff
+            $isLiquid = str_ends_with($key, '-liquid');
             $return[] = [
-                'key'                     => sprintf('net-worth-in-%s', $data['currency_code']),
+                'key'                     => sprintf('net-worth-in-%s', $isLiquid ? 'liquid-' . $data['currency_code'] : $data['currency_code']),
                 'title'                   => trans('firefly.box_net_worth_in_currency', ['currency'                   => $data['currency_symbol']]),
                 'monetary_value'          => $amount,
                 'currency_id'             => (string) $data['currency_id'],

@@ -2429,6 +2429,8 @@ return [
     'account_role_savingAsset'                            => 'Savings account',
     'account_role_ccAsset'                                => 'Credit card',
     'account_role_cashWalletAsset'                        => 'Cash wallet',
+    'account_role_retirementAsset'                        => 'Retirement account',
+    'account_role_investmentAsset'                        => 'Investment account',
     'budget_chart_click'                                  => 'Please click on a budget name in the table above to see a chart.',
     'category_chart_click'                                => 'Please click on a category name in the table above to see a chart.',
     'in_out_accounts'                                     => 'Earned and spent per combination',
