@@ -65,6 +65,9 @@ class NetWorth implements NetWorthInterface
         $cache->addProperty($convertToPrimary);
         $cache->addProperty('net-worth-by-accounts');
         $cache->addProperty($ids);
+        $cache->addProperty($accounts->map(function (Account $account): string {
+            return (string) $this->accountRepository->getMetaValue($account, 'account_role');
+        })->implode(','));
         if ($cache->has()) {
             return $cache->get();
         }
@@ -108,7 +111,7 @@ class NetWorth implements NetWorthInterface
             $netWorth[$currencyCode]['balance'] = bcadd((string) $amountToUse, $netWorth[$currencyCode]['balance']);
             
             $accountRole = $this->accountRepository->getMetaValue($account, 'account_role');
-            if ($accountRole != 'investmentAsset' && $accountRole != 'retirementAsset') {
+            if ($accountRole != 'retirementAsset') {
                 $liquidKey = $currencyCode . '-liquid';
                 $liquidNetWorth[$liquidKey] ??= [
                     'balance'                 => '0',
@@ -121,13 +124,10 @@ class NetWorth implements NetWorthInterface
                 $liquidNetWorth[$liquidKey]['balance'] = bcadd((string) $amountToUse, $liquidNetWorth[$liquidKey]['balance']);
             }
         }
-        $cache->store($netWorth);
-        $cache->store($liquidNetWorth);
+        $result = count($liquidNetWorth) > 0 ? array_merge($netWorth, $liquidNetWorth) : $netWorth;
+        $cache->store($result);
 
-        if (count($liquidNetWorth) > 0) {
-            return array_merge($netWorth, $liquidNetWorth);
-        }
-        return $netWorth;
+        return $result;
     }
 
     public function setUser(Authenticatable|User|null $user): void
